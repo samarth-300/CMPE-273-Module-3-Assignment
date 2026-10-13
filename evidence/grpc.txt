@@ -1,0 +1,22 @@
+##### gRPC: normal run #####
+$ curl -X POST localhost:5000/orders -d {"item_id":"apple","quantity":3}
+{"available":100,"item_id":"apple","quantity":3,"status":"accepted"}
+HTTP 201  (0.012986s)
+$ ... insufficient stock (cherry) -> FAILED_PRECONDITION
+{"error":"insufficient stock: requested 1, available 0","status":"rejected"}
+HTTP 409  (0.003123s)
+$ ... unknown item -> NOT_FOUND
+{"error":"item 'zzz' not found","status":"rejected"}
+HTTP 404  (0.002390s)
+
+##### gRPC: slow inventory (5s delay > 2s deadline) #####
+$ curl ... apple (slow inventory)
+{"error":"inventory deadline exceeded","status":"failed"}
+HTTP 504  (2.004853s)
+$ curl localhost:5000/health  (Order Service still up)
+{"status":"ok"}
+HTTP 200
+--- order service log ---
+[order] gRPC error: FAILED_PRECONDITION - insufficient stock: requested 1, available 0
+[order] gRPC error: NOT_FOUND - item 'zzz' not found
+[order] gRPC error: DEADLINE_EXCEEDED - Deadline Exceeded

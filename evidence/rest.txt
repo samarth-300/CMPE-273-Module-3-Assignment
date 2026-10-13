@@ -1,0 +1,20 @@
+##### REST: normal run #####
+$ curl -X POST localhost:5000/orders -d {"item_id":"apple","quantity":3}
+{"item_id":"apple","quantity":3,"status":"accepted"}
+HTTP 201  (0.006519s)
+$ ... insufficient stock (cherry)
+{"available":0,"error":"insufficient stock","status":"rejected"}
+HTTP 409  (0.004584s)
+$ ... unknown item
+{"error":"item 'zzz' not found","status":"rejected"}
+HTTP 404  (0.003829s)
+
+##### REST: slow inventory (5s delay > 2s timeout) #####
+$ curl ... apple (slow inventory)
+{"error":"inventory service timed out","status":"failed"}
+HTTP 504  (2.004531s)
+$ curl localhost:5000/health  (Order Service still up)
+{"status":"ok"}
+HTTP 200
+--- order service log ---
+[order] Inventory timed out after 2s

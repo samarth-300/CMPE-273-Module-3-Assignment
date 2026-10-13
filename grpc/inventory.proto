@@ -1,0 +1,20 @@
+syntax = "proto3";
+package inventory;
+
+service Inventory {
+  // Returns OK if stock is sufficient.
+  // NOT_FOUND: unknown item. FAILED_PRECONDITION: insufficient stock.
+  rpc CheckInventory (CheckRequest) returns (CheckResponse);
+}
+
+message CheckRequest {
+  string item_id = 1;
+  int32 quantity = 2;
+}
+
+message CheckResponse {
+  string item_id = 1;
+  int32 requested = 2;
+  int32 available = 3;
+  bool in_stock = 4;
+}
