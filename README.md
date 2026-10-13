@@ -48,6 +48,7 @@ HTTP 201  (0.0065s)
 ```
 
 ![REST successful request](evidence/rest_success.png)
+*Screenshot: successful REST request (HTTP 201) and unavailable item (insufficient stock).*
 Unavailable item (cherry, qty 1): `{"available":0,"error":"insufficient stock","status":"rejected"}` → `HTTP 409`
 
 ## Successful gRPC example
@@ -60,7 +61,6 @@ $ curl -X POST localhost:5000/orders -d '{"item_id":"apple","quantity":3}'
 HTTP 201  (0.013s)
 ```
 
-![gRPC successful request](evidence/grpc_success.png)
 Unavailable item (cherry, qty 1): inventory returns `FAILED_PRECONDITION` (`insufficient stock: requested 1, available 0`) → Order returns `HTTP 409`. Unknown item → `NOT_FOUND` → `HTTP 404`.
 
 ## Failure handling: slow Inventory Service
@@ -80,6 +80,7 @@ HTTP 504  (2.0045s)
 ```
 
 ![REST timeout handling and Order Service still running](evidence/rest_timeout.png)
+*Screenshot (left to right): Inventory Service sleeping 5s, Order Service logging `Inventory timed out after 2s`, client receiving HTTP 504 after ~2.0s followed by `/health` returning HTTP 200.*
 
 ### gRPC deadline evidence
 ```
@@ -90,7 +91,6 @@ HTTP 504  (2.0049s)
 [order] gRPC error: DEADLINE_EXCEEDED - Deadline Exceeded
 ```
 
-![gRPC deadline handling and Order Service still running](evidence/grpc_deadline.png)
 
 ### Order Service stays running after failures
 Immediately after each failure above, the same Order Service process answered a health check:
