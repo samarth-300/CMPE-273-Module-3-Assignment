@@ -1,0 +1,13 @@
+ * Serving Flask app 'order_service'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+127.0.0.1 - - [13/Oct/2026 06:43:45] "POST /orders HTTP/1.1" 201 -
+[order] gRPC error: FAILED_PRECONDITION - insufficient stock: requested 1, available 0
+127.0.0.1 - - [13/Oct/2026 06:43:45] "POST /orders HTTP/1.1" 409 -
+[order] gRPC error: NOT_FOUND - item 'zzz' not found
+127.0.0.1 - - [13/Oct/2026 06:43:45] "POST /orders HTTP/1.1" 404 -
+[order] gRPC error: DEADLINE_EXCEEDED - Deadline Exceeded
+127.0.0.1 - - [13/Oct/2026 06:43:50] "POST /orders HTTP/1.1" 504 -
+127.0.0.1 - - [13/Oct/2026 06:43:50] "GET /health HTTP/1.1" 200 -
