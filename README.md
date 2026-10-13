@@ -46,6 +46,8 @@ $ curl -X POST localhost:5000/orders -d '{"item_id":"apple","quantity":3}'
 {"item_id":"apple","quantity":3,"status":"accepted"}
 HTTP 201  (0.0065s)
 ```
+
+![REST successful request](evidence/rest_success.png)
 Unavailable item (cherry, qty 1): `{"available":0,"error":"insufficient stock","status":"rejected"}` → `HTTP 409`
 
 ## Successful gRPC example
@@ -57,6 +59,8 @@ $ curl -X POST localhost:5000/orders -d '{"item_id":"apple","quantity":3}'
 {"available":100,"item_id":"apple","quantity":3,"status":"accepted"}
 HTTP 201  (0.013s)
 ```
+
+![gRPC successful request](evidence/grpc_success.png)
 Unavailable item (cherry, qty 1): inventory returns `FAILED_PRECONDITION` (`insufficient stock: requested 1, available 0`) → Order returns `HTTP 409`. Unknown item → `NOT_FOUND` → `HTTP 404`.
 
 ## Failure handling: slow Inventory Service
@@ -75,6 +79,8 @@ HTTP 504  (2.0045s)
 [order] Inventory timed out after 2s
 ```
 
+![REST timeout handling and Order Service still running](evidence/rest_timeout.png)
+
 ### gRPC deadline evidence
 ```
 $ curl -X POST localhost:5000/orders -d '{"item_id":"apple","quantity":3}'
@@ -84,6 +90,8 @@ HTTP 504  (2.0049s)
 [order] gRPC error: DEADLINE_EXCEEDED - Deadline Exceeded
 ```
 
+![gRPC deadline handling and Order Service still running](evidence/grpc_deadline.png)
+
 ### Order Service stays running after failures
 Immediately after each failure above, the same Order Service process answered a health check:
 ```
@@ -91,7 +99,7 @@ $ curl localhost:5000/health
 {"status":"ok"}
 HTTP 200
 ```
-Both calls returned after ~2.00s (not the 5s delay), and the failure is caught and turned into a clean `504` instead of crashing the process. Full logs: `evidence/rest.txt`, `evidence/grpc.txt`.
+Both calls returned after ~2.00s (not the 5s delay), and the failure is caught and turned into a clean `504` instead of crashing the process. Screenshots of the terminal output are in `evidence/*.png`. Full logs: `evidence/rest.txt`, `evidence/grpc.txt`.
 
 ## Full terminal output
 
