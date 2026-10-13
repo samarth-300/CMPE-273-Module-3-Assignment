@@ -222,5 +222,15 @@ gRPC inventory listening on :50051
 ```
 The Order Service log shows `DEADLINE_EXCEEDED`, followed by the `504` response and a successful `GET /health` (`200`).
 
+## Supplementary: Order Service when Inventory is unreachable (REST)
+
+These screenshots are from an extra run, not the gRPC run. The REST Order Service (`rest/order_service.py`) was running while the REST Inventory Service was stopped, so nothing was listening on port 5001 (a gRPC inventory server was started separately on port 50051 and was not called). The Order Service handled the connection failure cleanly by returning `HTTP 503` ("inventory service unavailable") and then kept running and answered `/health` with `HTTP 200`. This is a different failure from the timeout above and shows the same resilience.
+
+![Order Service returns 503 when Inventory is unreachable](evidence/rest_order_inventory_unavailable_1.png)
+*Left to right: gRPC inventory server listening on :50051, REST Order Service, client receiving `HTTP 503` for both requests.*
+
+![Order Service still healthy after 503](evidence/rest_order_inventory_unavailable_2.png)
+*The Order Service logs `503` responses, then `GET /health` returns `HTTP 200`, so it stayed up.*
+
 ## REST vs. gRPC comparison
 With REST, the contract was implicit: I hand-wrote the JSON field names and chose HTTP status codes (200/404/409), and nothing enforced them on either side. With gRPC, the `.proto` file is the single source of truth, and generated stubs gave typed request/response objects and a built-in status vocabulary (`NOT_FOUND`, `FAILED_PRECONDITION`, `DEADLINE_EXCEEDED`). Timeouts were comparable in effort (`timeout=2` vs. a deadline argument), but a gRPC deadline is part of the call itself and can propagate to downstream services, while a REST timeout is only a client-side setting. REST was quicker to start and easier to debug with plain `curl`, whereas gRPC needed a code-generation step and extra tooling to inspect calls. In both cases the Order Service had to explicitly translate the failure into its own response, which is what kept it running.
